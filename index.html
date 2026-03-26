@@ -21,6 +21,7 @@
         
         /* Controles Superiores */
         .top-controls { display: flex; flex-wrap: wrap; gap: 15px; background: #edf2f7; padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; align-items: center; justify-content: space-between; border: 1px solid var(--border); }
+        .row-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
         
         button { padding: 10px 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         button:hover { background: #2b6cb0; }
@@ -28,6 +29,8 @@
         .btn-download:hover { background: #2f855a; }
         .btn-add-row { background: #4a5568; }
         .btn-add-row:hover { background: #2d3748; }
+        .btn-remove-row { background: #e53e3e; }
+        .btn-remove-row:hover { background: #c53030; }
 
         /* Estilos de la Tabla (Formato Planilla) */
         .table-wrapper { background: white; padding: 10px; border-radius: 8px; border: 2px dashed #cbd5e0; overflow-x: auto; }
@@ -39,7 +42,7 @@
         /* Celdas de las horas (Izquierda) */
         .time-cell { font-weight: bold; background-color: #f8fafc; cursor: text; white-space: nowrap; width: 130px; font-size: 13px; outline: none; }
         .time-cell:focus { background-color: #ebf8ff; }
-        .top-left-cell { background-color: #f687b3; color: black; font-weight: bold; cursor: text; outline: none; } 
+        .top-left-cell { background-color: #f8fafc; color: #1a202c; font-weight: bold; cursor: text; outline: none; } 
 
         /* Celdas de los días (Donde va la materia) */
         .day-cell { cursor: pointer; font-size: 13px; font-weight: 600; color: #000; transition: 0.1s; word-wrap: break-word; max-width: 140px; }
@@ -77,7 +80,10 @@
     </div>
     
     <div class="top-controls">
-        <button class="btn-add-row" onclick="agregarFila()">+ Agregar Fila (Horario)</button>
+        <div class="row-buttons">
+            <button class="btn-add-row" onclick="agregarFila()">+ Agregar Fila (Horario)</button>
+            <button class="btn-remove-row" onclick="borrarUltimaFila()">- Borrar Última Fila</button>
+        </div>
         <button class="btn-download" onclick="descargarImagen()">📸 Descargar Imagen</button>
     </div>
 
@@ -89,7 +95,7 @@
                         <th class="top-left-cell" contenteditable="true"></th>
                         <th>LUNES</th>
                         <th>MARTES</th>
-                        <th>MIERCOLES</th>
+                        <th>MIÉRCOLES</th>
                         <th>JUEVES</th>
                         <th>VIERNES</th>
                     </tr>
@@ -112,7 +118,7 @@
                         <td class="day-cell" onclick="abrirModal(this)"></td>
                     </tr>
                     <tr>
-                        <td class="time-cell" contenteditable="true">9:30 a 10:15</td>
+                        <td class="time-cell" contenteditable="true">09:30 a 10:15</td>
                         <td class="day-cell" onclick="abrirModal(this)"></td>
                         <td class="day-cell" onclick="abrirModal(this)"></td>
                         <td class="day-cell" onclick="abrirModal(this)"></td>
@@ -243,6 +249,15 @@
         tbody.appendChild(nuevaFila);
     }
 
+    function borrarUltimaFila() {
+        let tbody = document.getElementById('table-body');
+        if (tbody.children.length > 1) {
+            tbody.removeChild(tbody.lastElementChild);
+        } else {
+            alert("No se pueden borrar más filas.");
+        }
+    }
+
     function abrirModal(celda) {
         celdaActiva = celda;
         
@@ -267,6 +282,7 @@
 
         // Leer los horarios de las filas que están por debajo para dar la opción de extender la clase
         for (let i = rowIndex; i < tbody.children.length; i++) {
+            // Corrección: Leer la celda 0 (donde está el horario)
             let timeText = tbody.children[i].cells.innerText.trim();
             let option = document.createElement('option');
             option.value = (i - rowIndex + 1); // Este valor indicará cuántos bloques ocupa (rowspan)
@@ -385,7 +401,7 @@
         let match = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
         if (!match) return "#ffffff";
         function hex(x) { return ("0" + parseInt(x).toString(16)).slice(-2); }
-        // Se corrigió el error de sumar 3 veces el mismo índice
+        // Se corrigió el error de pasar parámetros inválidos
         return "#" + hex(match) + hex(match) + hex(match);
     }
 </script>
