@@ -254,25 +254,21 @@
         if (tbody.children.length > 1) {
             tbody.removeChild(tbody.lastElementChild);
         } else {
-            alert("No se pueden borrar más filas.");
+            alert("No podés borrar la última fila que queda.");
         }
     }
 
     function abrirModal(celda) {
         celdaActiva = celda;
         
-        // 1. Cargar el texto actual
+        // Cargar nombre
         document.getElementById('ev-nombre').value = celda.innerText;
         
-        // 2. Cargar el color actual
+        // Cargar color de forma 100% segura
         let bgColor = window.getComputedStyle(celda).backgroundColor;
-        if(bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
-            document.getElementById('ev-color').value = rgbToHex(bgColor);
-        } else {
-            document.getElementById('ev-color').value = "#f6e05e"; // Amarillo por defecto
-        }
+        document.getElementById('ev-color').value = rgbToHex(bgColor);
 
-        // 3. Generar las opciones de "Hasta qué hora" dinámicamente
+        // Armar la lista de horarios
         let tbody = document.getElementById('table-body');
         let tr = celda.parentElement;
         let rowIndex = Array.from(tbody.children).indexOf(tr);
@@ -280,18 +276,13 @@
         let selectFin = document.getElementById('ev-fin');
         selectFin.innerHTML = ''; 
 
-        // Leer los horarios de las filas que están por debajo para dar la opción de extender la clase
         for (let i = rowIndex; i < tbody.children.length; i++) {
-            // CORRECCIÓN CLAVE ACÁ: Faltaba el para apuntar a la celda de la hora
             let timeText = tbody.children[i].cells.innerText.trim();
             let option = document.createElement('option');
-            option.value = (i - rowIndex + 1); // Este valor indicará cuántos bloques ocupa (rowspan)
-            option.innerText = "Finaliza al terminar: " + timeText;
+            option.value = (i - rowIndex + 1);
+            option.innerText = "Ocupar hasta bloque de: " + timeText;
             selectFin.appendChild(option);
         }
-        
-        // Seleccionar por defecto lo que ya ocupaba la celda
-        selectFin.value = celda.rowSpan || 1;
 
         document.getElementById('modal').style.display = "flex";
         document.getElementById('ev-nombre').focus();
@@ -307,51 +298,23 @@
         
         let texto = document.getElementById('ev-nombre').value;
         let color = document.getElementById('ev-color').value;
-        let spanRequerido = parseInt(document.getElementById('ev-fin').value);
+        let bloquesOcupados = parseInt(document.getElementById('ev-fin').value);
 
         let tbody = document.getElementById('table-body');
         let tr = celdaActiva.parentElement;
         let rowIndex = Array.from(tbody.children).indexOf(tr);
         let colIndex = celdaActiva.cellIndex;
 
-        // PASO A: Restaurar (mostrar) celdas que estaban ocultas si la materia ocupaba más de 1 bloque antes
-        let oldSpan = celdaActiva.rowSpan;
-        if (oldSpan > 1) {
-            for (let i = 1; i < oldSpan; i++) {
-                if (tbody.children[rowIndex + i]) {
-                    tbody.children[rowIndex + i].cells[colIndex].style.display = "";
-                }
-            }
-        }
-
-        // PASO B: Aplicar texto y color a la celda principal
+        // Escribimos el texto en la primera celda y le damos color
         celdaActiva.innerHTML = texto.replace(/\n/g, '<br>');
-        if (texto.trim() !== "" || color !== "#ffffff") {
-            celdaActiva.style.backgroundColor = color;
-        } else {
-            celdaActiva.style.backgroundColor = ""; 
-        }
+        celdaActiva.style.backgroundColor = color !== "#ffffff" ? color : "";
 
-        // PASO C: Expandir la celda (rowspan) y ocultar las celdas de abajo que son "pisadas" por esta
-        celdaActiva.rowSpan = spanRequerido;
-        for (let i = 1; i < spanRequerido; i++) {
+        // Pintamos el resto de las celdas hacia abajo del mismo color (pero las dejamos vacías de texto)
+        for (let i = 1; i < bloquesOcupados; i++) {
             if (tbody.children[rowIndex + i]) {
-                let cellToHide = tbody.children[rowIndex + i].cells[colIndex];
-                
-                // Medida de seguridad: Si vamos a ocultar una celda que tenía su propio rowspan, lo reseteamos
-                let childSpan = cellToHide.rowSpan;
-                if (childSpan > 1) {
-                    for(let j = 1; j < childSpan; j++) {
-                        let hiddenChild = tbody.children[rowIndex + i + j]?.cells[colIndex];
-                        if(hiddenChild) hiddenChild.style.display = "";
-                    }
-                }
-
-                // Ocultamos la celda
-                cellToHide.style.display = "none";
-                cellToHide.innerHTML = "";
-                cellToHide.style.backgroundColor = "";
-                cellToHide.rowSpan = 1;
+                let celdaAbajo = tbody.children[rowIndex + i].cells[colIndex];
+                celdaAbajo.innerHTML = ""; 
+                celdaAbajo.style.backgroundColor = color !== "#ffffff" ? color : "";
             }
         }
         
@@ -360,23 +323,6 @@
 
     function limpiarCelda() {
         if (!celdaActiva) return;
-        
-        let tbody = document.getElementById('table-body');
-        let tr = celdaActiva.parentElement;
-        let rowIndex = Array.from(tbody.children).indexOf(tr);
-        let colIndex = celdaActiva.cellIndex;
-
-        // Restaurar celdas ocultas debajo
-        let oldSpan = celdaActiva.rowSpan;
-        if (oldSpan > 1) {
-            for (let i = 1; i < oldSpan; i++) {
-                if (tbody.children[rowIndex + i]) {
-                    tbody.children[rowIndex + i].cells[colIndex].style.display = "";
-                }
-            }
-        }
-
-        celdaActiva.rowSpan = 1;
         celdaActiva.innerHTML = "";
         celdaActiva.style.backgroundColor = "";
         cerrarModal();
@@ -384,7 +330,6 @@
 
     function descargarImagen() {
         const area = document.getElementById('capture-area');
-
         html2canvas(area, {
             scale: 2, 
             backgroundColor: "#ffffff",
@@ -397,12 +342,14 @@
         });
     }
 
-    // CORRECCIÓN CLAVE ACÁ: Faltaban los corchetes en el match para leer bien el color
     function rgbToHex(rgb) {
-        let match = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
-        if (!match) return "#ffffff";
-        function hex(x) { return ("0" + parseInt(x).toString(16)).slice(-2); }
-        return "#" + hex(match) + hex(match) + hex(match);
+        if (rgb === 'rgba(0, 0, 0, 0)' || rgb === 'transparent') return "#f6e05e";
+        let rgbValues = rgb.match(/\d+/g);
+        if (!rgbValues || rgbValues.length < 3) return "#f6e05e";
+        let r = parseInt(rgbValues).toString(16).padStart(2, '0');
+        let g = parseInt(rgbValues).toString(16).padStart(2, '0');
+        let b = parseInt(rgbValues).toString(16).padStart(2, '0');
+        return `#${r}${g}${b}`;
     }
 </script>
 
