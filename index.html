@@ -53,8 +53,14 @@
         .modal label { display: block; margin-top: 10px; font-weight: bold; color: #4a5568; font-size: 13px; }
         .modal textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; outline: none; resize: vertical; min-height: 60px; font-family: inherit; }
         .modal select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; outline: none; font-size: 13px; cursor: pointer; }
-        .modal input[type="color"] { height: 40px; width: 100%; padding: 2px; cursor: pointer; border: 1px solid #cbd5e0; border-radius: 6px; margin-top: 5px; }
         
+        /* Paleta de Colores */
+        .color-palette { display: flex; gap: 10px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
+        .color-swatch { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.1s; }
+        .color-swatch:hover { transform: scale(1.15); }
+        .color-swatch.active { border: 2px solid #1a202c; transform: scale(1.1); box-shadow: 0 0 0 2px white inset; }
+        .custom-color-input { width: 32px; height: 32px; padding: 0; border: none; cursor: pointer; border-radius: 50%; overflow: hidden; background: transparent; }
+
         .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
         .row-actions { display: flex; gap: 10px; }
         .row-actions button { flex: 1; padding: 12px; }
@@ -196,14 +202,28 @@
     <div class="modal">
         <h3>Editar Actividad</h3>
         
-        <label>Nombre:</label>
-        <textarea id="ev-nombre" placeholder="Ej: Programación, Gimnasio, Trabajo..."></textarea>
+        <label>Materia / Tarea:</label>
+        <textarea id="ev-nombre" placeholder="Ej: Álgebra, Trabajo..."></textarea>
         
-        <label>Duración (Hasta qué hora):</label>
+        <div style="margin-top: 15px; font-size: 13px; color: #4a5568;">
+            <b>Desde:</b> <span id="ev-inicio-text" style="color: var(--primary); font-weight: bold;">--:--</span>
+        </div>
+
+        <label style="margin-top: 5px;">Hasta (Elegir final):</label>
         <select id="ev-fin"></select>
 
         <label>Color de fondo:</label>
-        <input type="color" id="ev-color" value="#f6e05e">
+        <div class="color-palette">
+            <div class="color-swatch" data-color="#fef08a" style="background-color: #fef08a;" onclick="seleccionarColor('#fef08a', this)"></div>
+            <div class="color-swatch" data-color="#90cdf4" style="background-color: #90cdf4;" onclick="seleccionarColor('#90cdf4', this)"></div>
+            <div class="color-swatch" data-color="#9ae6b4" style="background-color: #9ae6b4;" onclick="seleccionarColor('#9ae6b4', this)"></div>
+            <div class="color-swatch" data-color="#feb2b2" style="background-color: #feb2b2;" onclick="seleccionarColor('#feb2b2', this)"></div>
+            <div class="color-swatch" data-color="#d6bcfa" style="background-color: #d6bcfa;" onclick="seleccionarColor('#d6bcfa', this)"></div>
+            <div class="color-swatch" data-color="#fbd38d" style="background-color: #fbd38d;" onclick="seleccionarColor('#fbd38d', this)"></div>
+            <div class="color-swatch" data-color="#e2e8f0" style="background-color: #e2e8f0;" onclick="seleccionarColor('#e2e8f0', this)"></div>
+            <input type="color" id="ev-color-custom" class="custom-color-input" title="Elegir otro color" onchange="seleccionarColorPersonalizado(this.value)">
+        </div>
+        <input type="hidden" id="ev-color" value="#fef08a">
 
         <div class="modal-actions">
             <button onclick="guardarCelda()">Guardar Celda</button>
@@ -233,6 +253,7 @@
     function agregarFila() {
         let tbody = document.getElementById('table-body');
         let nuevaFila = document.createElement('tr');
+        
         nuevaFila.innerHTML = `
             <td class="time-cell" contenteditable="true">16:15 a 17:00</td>
             <td class="day-cell" onclick="abrirModal(this)"></td>
@@ -241,6 +262,7 @@
             <td class="day-cell" onclick="abrirModal(this)"></td>
             <td class="day-cell" onclick="abrirModal(this)"></td>
         `;
+        
         tbody.appendChild(nuevaFila);
     }
 
@@ -253,11 +275,27 @@
         }
     }
 
+    // Funciones para la paleta de colores
+    function seleccionarColor(hex, elemento) {
+        document.getElementById('ev-color').value = hex;
+        // Sacar la clase active de todos los circulitos
+        document.querySelectorAll('.color-swatch').forEach(sw => sw.classList.remove('active'));
+        if (elemento) elemento.classList.add('active');
+    }
+
+    function seleccionarColorPersonalizado(hex) {
+        document.getElementById('ev-color').value = hex;
+        document.querySelectorAll('.color-swatch').forEach(sw => sw.classList.remove('active'));
+    }
+
     function abrirModal(celda) {
         celdaActiva = celda;
+        
+        // 1. Cargar nombre
         document.getElementById('ev-nombre').value = celda.innerText || "";
         
-        let colorHex = "#f6e05e"; // Color por defecto si falla algo
+        // 2. Cargar color
+        let colorHex = "#fef08a"; // Amarillo pastel por defecto
         try {
             let bgColor = window.getComputedStyle(celda).backgroundColor;
             if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
@@ -271,8 +309,23 @@
             }
         } catch(e) {}
         
+        // Buscar si el color existe en la paleta y marcarlo
+        let swatches = document.querySelectorAll('.color-swatch');
+        let encontrado = false;
+        swatches.forEach(sw => {
+            sw.classList.remove('active');
+            if (sw.getAttribute('data-color') === colorHex) {
+                sw.classList.add('active');
+                encontrado = true;
+            }
+        });
+        
+        if (!encontrado && colorHex !== "#ffffff") {
+            document.getElementById('ev-color-custom').value = colorHex;
+        }
         document.getElementById('ev-color').value = colorHex;
 
+        // 3. Extraer el "Desde" y las opciones "Hasta"
         let tbody = document.getElementById('table-body');
         let tr = celda.parentElement;
         
@@ -284,16 +337,29 @@
         let selectFin = document.getElementById('ev-fin');
         selectFin.innerHTML = ''; 
 
+        // Conseguir la hora de inicio de la celda clickeada
+        let textoHoraInicial = tbody.children[rowIndex].cells.innerText.trim();
+        let parteInicio = textoHoraInicial.split(" a "); // Recorta lo de antes de la "a"
+        document.getElementById('ev-inicio-text').innerText = parteInicio || textoHoraInicial;
+
+        // Armar el desplegable con las horas de fin
         for (let i = rowIndex; i < tbody.children.length; i++) {
             let fila = tbody.children[i];
             let celdaHora = fila.querySelector('.time-cell');
-            let timeText = celdaHora ? celdaHora.innerText.trim() : "Fin del bloque";
+            let textoFila = celdaHora ? celdaHora.innerText.trim() : "";
+            
+            // Recorta lo de después de la "a" (ej: de "08:45 a 09:30" saca "09:30")
+            let partesFila = textoFila.split(" a ");
+            let parteFin = partesFila.length > 1 ? partesFila : textoFila;
             
             let option = document.createElement('option');
             option.value = (i - rowIndex + 1);
-            option.innerText = "Ocupar hasta: " + timeText;
+            option.innerText = parteFin.trim();
             selectFin.appendChild(option);
         }
+        
+        // Mantener la selección anterior si la celda ya ocupaba varios bloques
+        selectFin.value = celda.rowSpan || 1;
 
         document.getElementById('modal').style.display = "flex";
         document.getElementById('ev-nombre').focus();
@@ -321,6 +387,19 @@
         
         let colIndex = celdaActiva.cellIndex;
 
+        // Restaurar celdas ocultas debajo (por si achicamos la materia)
+        let oldSpan = celdaActiva.rowSpan;
+        if (oldSpan > 1) {
+            for (let i = 1; i < oldSpan; i++) {
+                if (tbody.children[rowIndex + i]) {
+                    let celdaOculta = tbody.children[rowIndex + i].cells[colIndex];
+                    celdaOculta.style.display = "";
+                    celdaOculta.style.borderTop = "1px solid #000";
+                    celdaOculta.style.borderBottom = "1px solid #000";
+                }
+            }
+        }
+
         // Limpiar bordes antes de aplicar nuevos
         celdaActiva.style.borderBottom = "1px solid #000";
         celdaActiva.innerHTML = texto.replace(/\n/g, '<br>');
@@ -330,11 +409,27 @@
             celdaActiva.style.borderBottom = "none";
         }
 
+        celdaActiva.rowSpan = 1;
+
         for (let i = 1; i < bloquesOcupados; i++) {
             let filaAdicional = tbody.children[rowIndex + i];
             if (filaAdicional) {
                 let celdaAbajo = filaAdicional.cells[colIndex];
                 if (celdaAbajo) {
+                    // Borramos el rowspan si es que tenía uno
+                    let childSpan = celdaAbajo.rowSpan;
+                    if (childSpan > 1) {
+                        for(let j = 1; j < childSpan; j++) {
+                            let hiddenChild = tbody.children[rowIndex + i + j]?.cells[colIndex];
+                            if(hiddenChild) {
+                                hiddenChild.style.display = "";
+                                hiddenChild.style.borderTop = "1px solid #000";
+                                hiddenChild.style.borderBottom = "1px solid #000";
+                            }
+                        }
+                    }
+
+                    celdaAbajo.rowSpan = 1;
                     celdaAbajo.innerHTML = ""; 
                     celdaAbajo.style.backgroundColor = color !== "#ffffff" ? color : "";
                     celdaAbajo.style.borderTop = "none";
@@ -352,9 +447,33 @@
 
     function limpiarCelda() {
         if (!celdaActiva) return;
+        
+        let tbody = document.getElementById('table-body');
+        let tr = celdaActiva.parentElement;
+        let rowIndex = Array.from(tbody.children).indexOf(tr);
+        let colIndex = celdaActiva.cellIndex;
+
+        // Calculamos cuántos bloques hacia abajo tiene pintados (sin texto)
+        let colorFondo = celdaActiva.style.backgroundColor;
+        
         celdaActiva.innerHTML = "";
         celdaActiva.style.backgroundColor = "";
-        celdaActiva.style.borderBottom = "1px solid #000";
+        celdaActiva.style.borderBottom = "1px solid #000"; 
+        
+        // Recorrer hacia abajo y limpiar las celdas que formaban parte del bloque
+        if (colorFondo) {
+            for (let i = 1; i < tbody.children.length - rowIndex; i++) {
+                let celdaAbajo = tbody.children[rowIndex + i]?.cells[colIndex];
+                if (celdaAbajo && celdaAbajo.innerHTML === "" && celdaAbajo.style.backgroundColor === colorFondo) {
+                    celdaAbajo.style.backgroundColor = "";
+                    celdaAbajo.style.borderTop = "1px solid #000";
+                    celdaAbajo.style.borderBottom = "1px solid #000";
+                } else {
+                    break; // Si encontramos una con texto u otro color, paramos
+                }
+            }
+        }
+
         cerrarModal();
     }
 
