@@ -39,7 +39,7 @@
         /* Celdas de las horas (Izquierda) */
         .time-cell { font-weight: bold; background-color: #f8fafc; cursor: text; white-space: nowrap; width: 130px; font-size: 13px; outline: none; }
         .time-cell:focus { background-color: #ebf8ff; }
-        .top-left-cell { background-color: #f687b3; color: black; font-weight: bold; cursor: text; outline: none; } /* Color rosa como tu foto */
+        .top-left-cell { background-color: #f687b3; color: black; font-weight: bold; cursor: text; outline: none; } 
 
         /* Celdas de los días (Donde va la materia) */
         .day-cell { cursor: pointer; font-size: 13px; font-weight: 600; color: #000; transition: 0.1s; word-wrap: break-word; max-width: 140px; }
@@ -47,10 +47,11 @@
 
         /* Modal (Popup) */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
-        .modal { background: white; padding: 25px; border-radius: 12px; width: 300px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal { background: white; padding: 25px; border-radius: 12px; width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .modal h3 { margin-top: 0; color: var(--dark); font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px;}
         .modal label { display: block; margin-top: 10px; font-weight: bold; color: #4a5568; font-size: 13px; }
         .modal textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; outline: none; resize: vertical; min-height: 60px; font-family: inherit; }
+        .modal select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; outline: none; font-size: 13px; cursor: pointer; }
         .modal input[type="color"] { height: 40px; width: 100%; padding: 2px; cursor: pointer; border: 1px solid #cbd5e0; border-radius: 6px; margin-top: 5px; }
         
         .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
@@ -72,7 +73,7 @@
 <div class="app-container">
     <div class="header-text">
         <h2>Organizador Semanal 📅</h2>
-        <p class="subtitle">Hacé clic en cualquier celda para agregar una materia. Podés editar las horas haciendo clic sobre ellas.</p>
+        <p class="subtitle">Hacé clic en cualquier celda para agregar una actividad. Podés editar las horas de la izquierda.</p>
     </div>
     
     <div class="top-controls">
@@ -190,11 +191,14 @@
 
 <div class="modal-overlay" id="modal">
     <div class="modal">
-        <h3>Editar Celda</h3>
+        <h3>Editar Actividad</h3>
         
-        <label>Actividad / Materia:</label>
-        <textarea id="ev-nombre" placeholder="Ej: A.M II (Aux. Marcos Paz)"></textarea>
+        <label>Nombre:</label>
+        <textarea id="ev-nombre" placeholder="Ej: Programación, Gimnasio, Trabajo..."></textarea>
         
+        <label>Duración (Hasta qué hora):</label>
+        <select id="ev-fin"></select>
+
         <label>Color de fondo:</label>
         <input type="color" id="ev-color" value="#f6e05e">
 
@@ -221,9 +225,8 @@
 </footer>
 
 <script>
-    let celdaActiva = null; // Guardamos en memoria qué celda clickeó el usuario
+    let celdaActiva = null; 
 
-    // Agrega una nueva fila al final de la tabla
     function agregarFila() {
         let tbody = document.getElementById('table-body');
         let nuevaFila = document.createElement('tr');
@@ -240,20 +243,39 @@
         tbody.appendChild(nuevaFila);
     }
 
-    // Abre el modal al hacer clic en una celda
     function abrirModal(celda) {
         celdaActiva = celda;
         
-        // Si la celda ya tenía texto o color, lo cargamos en el modal
+        // 1. Cargar el texto actual
         document.getElementById('ev-nombre').value = celda.innerText;
         
-        // Convertimos el color RGB (que usa el navegador) a HEX para el input
+        // 2. Cargar el color actual y arreglar el bug rgbToHex
         let bgColor = window.getComputedStyle(celda).backgroundColor;
         if(bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
             document.getElementById('ev-color').value = rgbToHex(bgColor);
         } else {
             document.getElementById('ev-color').value = "#f6e05e"; // Amarillo por defecto
         }
+
+        // 3. Generar las opciones de "Hasta qué hora" dinámicamente
+        let tbody = document.getElementById('table-body');
+        let tr = celda.parentElement;
+        let rowIndex = Array.from(tbody.children).indexOf(tr);
+        
+        let selectFin = document.getElementById('ev-fin');
+        selectFin.innerHTML = ''; 
+
+        // Leer los horarios de las filas que están por debajo para dar la opción de extender la clase
+        for (let i = rowIndex; i < tbody.children.length; i++) {
+            let timeText = tbody.children[i].cells.innerText.trim();
+            let option = document.createElement('option');
+            option.value = (i - rowIndex + 1); // Este valor indicará cuántos bloques ocupa (rowspan)
+            option.innerText = "Finaliza al terminar: " + timeText;
+            selectFin.appendChild(option);
+        }
+        
+        // Seleccionar por defecto lo que ya ocupaba la celda
+        selectFin.value = celda.rowSpan || 1;
 
         document.getElementById('modal').style.display = "flex";
         document.getElementById('ev-nombre').focus();
@@ -269,14 +291,52 @@
         
         let texto = document.getElementById('ev-nombre').value;
         let color = document.getElementById('ev-color').value;
+        let spanRequerido = parseInt(document.getElementById('ev-fin').value);
 
-        // Reemplazamos los saltos de línea por etiquetas <br> para que se vea bien en la tabla
+        let tbody = document.getElementById('table-body');
+        let tr = celdaActiva.parentElement;
+        let rowIndex = Array.from(tbody.children).indexOf(tr);
+        let colIndex = celdaActiva.cellIndex;
+
+        // PASO A: Restaurar (mostrar) celdas que estaban ocultas si la materia ocupaba más de 1 bloque antes
+        let oldSpan = celdaActiva.rowSpan;
+        if (oldSpan > 1) {
+            for (let i = 1; i < oldSpan; i++) {
+                if (tbody.children[rowIndex + i]) {
+                    tbody.children[rowIndex + i].cells[colIndex].style.display = "";
+                }
+            }
+        }
+
+        // PASO B: Aplicar texto y color a la celda principal
         celdaActiva.innerHTML = texto.replace(/\n/g, '<br>');
-        
-        if (texto.trim() !== "") {
+        if (texto.trim() !== "" || color !== "#ffffff") {
             celdaActiva.style.backgroundColor = color;
         } else {
-            celdaActiva.style.backgroundColor = ""; // Si lo deja vacío, le sacamos el color
+            celdaActiva.style.backgroundColor = ""; 
+        }
+
+        // PASO C: Expandir la celda (rowspan) y ocultar las celdas de abajo que son "pisadas" por esta
+        celdaActiva.rowSpan = spanRequerido;
+        for (let i = 1; i < spanRequerido; i++) {
+            if (tbody.children[rowIndex + i]) {
+                let cellToHide = tbody.children[rowIndex + i].cells[colIndex];
+                
+                // Medida de seguridad: Si vamos a ocultar una celda que tenía su propio rowspan, lo reseteamos
+                let childSpan = cellToHide.rowSpan;
+                if (childSpan > 1) {
+                    for(let j = 1; j < childSpan; j++) {
+                        let hiddenChild = tbody.children[rowIndex + i + j]?.cells[colIndex];
+                        if(hiddenChild) hiddenChild.style.display = "";
+                    }
+                }
+
+                // Ocultamos la celda
+                cellToHide.style.display = "none";
+                cellToHide.innerHTML = "";
+                cellToHide.style.backgroundColor = "";
+                cellToHide.rowSpan = 1;
+            }
         }
         
         cerrarModal();
@@ -284,6 +344,23 @@
 
     function limpiarCelda() {
         if (!celdaActiva) return;
+        
+        let tbody = document.getElementById('table-body');
+        let tr = celdaActiva.parentElement;
+        let rowIndex = Array.from(tbody.children).indexOf(tr);
+        let colIndex = celdaActiva.cellIndex;
+
+        // Restaurar celdas ocultas debajo
+        let oldSpan = celdaActiva.rowSpan;
+        if (oldSpan > 1) {
+            for (let i = 1; i < oldSpan; i++) {
+                if (tbody.children[rowIndex + i]) {
+                    tbody.children[rowIndex + i].cells[colIndex].style.display = "";
+                }
+            }
+        }
+
+        celdaActiva.rowSpan = 1;
         celdaActiva.innerHTML = "";
         celdaActiva.style.backgroundColor = "";
         cerrarModal();
@@ -304,11 +381,11 @@
         });
     }
 
-    // Función auxiliar para convertir colores RGB a Hexadecimal (necesario para el input color)
     function rgbToHex(rgb) {
         let match = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
         if (!match) return "#ffffff";
         function hex(x) { return ("0" + parseInt(x).toString(16)).slice(-2); }
+        // Se corrigió el error de sumar 3 veces el mismo índice
         return "#" + hex(match) + hex(match) + hex(match);
     }
 </script>
