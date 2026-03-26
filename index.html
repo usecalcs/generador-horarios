@@ -63,7 +63,6 @@
         .btn-clear { background: #e53e3e; }
         .btn-clear:hover { background: #c53030; }
 
-        /* Footer unificado */
         footer { margin-top: 40px; text-align: center; font-size: 14px; color: #718096; width: 100%; max-width: 850px; border-top: 1px solid var(--border); padding-top: 20px; padding-bottom: 40px; }
         footer a { color: var(--primary); text-decoration: none; font-weight: bold; }
         footer a:hover { text-decoration: underline; }
@@ -234,7 +233,6 @@
     function agregarFila() {
         let tbody = document.getElementById('table-body');
         let nuevaFila = document.createElement('tr');
-        
         nuevaFila.innerHTML = `
             <td class="time-cell" contenteditable="true">16:15 a 17:00</td>
             <td class="day-cell" onclick="abrirModal(this)"></td>
@@ -243,7 +241,6 @@
             <td class="day-cell" onclick="abrirModal(this)"></td>
             <td class="day-cell" onclick="abrirModal(this)"></td>
         `;
-        
         tbody.appendChild(nuevaFila);
     }
 
@@ -258,28 +255,43 @@
 
     function abrirModal(celda) {
         celdaActiva = celda;
+        document.getElementById('ev-nombre').value = celda.innerText || "";
         
-        // Cargar nombre
-        document.getElementById('ev-nombre').value = celda.innerText;
+        let colorHex = "#f6e05e"; // Color por defecto si falla algo
+        try {
+            let bgColor = window.getComputedStyle(celda).backgroundColor;
+            if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+                let rgb = bgColor.match(/\d+/g);
+                if (rgb && rgb.length >= 3) {
+                    let r = parseInt(rgb).toString(16).padStart(2, '0');
+                    let g = parseInt(rgb).toString(16).padStart(2, '0');
+                    let b = parseInt(rgb).toString(16).padStart(2, '0');
+                    colorHex = "#" + r + g + b;
+                }
+            }
+        } catch(e) {}
         
-        // Cargar color 
-        let bgColor = window.getComputedStyle(celda).backgroundColor;
-        document.getElementById('ev-color').value = rgbToHex(bgColor);
+        document.getElementById('ev-color').value = colorHex;
 
-        // Armar la lista de horarios
         let tbody = document.getElementById('table-body');
         let tr = celda.parentElement;
-        let rowIndex = Array.from(tbody.children).indexOf(tr);
+        
+        let rowIndex = -1;
+        for(let i = 0; i < tbody.children.length; i++) {
+            if(tbody.children[i] === tr) { rowIndex = i; break; }
+        }
         
         let selectFin = document.getElementById('ev-fin');
         selectFin.innerHTML = ''; 
 
         for (let i = rowIndex; i < tbody.children.length; i++) {
-            // ACÁ ESTABA EL ERROR: Agregué el para que lea la primera columna (las horas)
-            let timeText = tbody.children[i].cells.innerText.trim();
+            let fila = tbody.children[i];
+            let celdaHora = fila.querySelector('.time-cell');
+            let timeText = celdaHora ? celdaHora.innerText.trim() : "Fin del bloque";
+            
             let option = document.createElement('option');
             option.value = (i - rowIndex + 1);
-            option.innerText = "Ocupar hasta bloque de: " + timeText;
+            option.innerText = "Ocupar hasta: " + timeText;
             selectFin.appendChild(option);
         }
 
@@ -301,19 +313,37 @@
 
         let tbody = document.getElementById('table-body');
         let tr = celdaActiva.parentElement;
-        let rowIndex = Array.from(tbody.children).indexOf(tr);
+        
+        let rowIndex = -1;
+        for(let i = 0; i < tbody.children.length; i++) {
+            if(tbody.children[i] === tr) { rowIndex = i; break; }
+        }
+        
         let colIndex = celdaActiva.cellIndex;
 
-        // Escribimos el texto en la primera celda y le damos color
+        // Limpiar bordes antes de aplicar nuevos
+        celdaActiva.style.borderBottom = "1px solid #000";
         celdaActiva.innerHTML = texto.replace(/\n/g, '<br>');
         celdaActiva.style.backgroundColor = color !== "#ffffff" ? color : "";
 
-        // Pintamos el resto de las celdas hacia abajo del mismo color 
+        if (bloquesOcupados > 1) {
+            celdaActiva.style.borderBottom = "none";
+        }
+
         for (let i = 1; i < bloquesOcupados; i++) {
-            if (tbody.children[rowIndex + i]) {
-                let celdaAbajo = tbody.children[rowIndex + i].cells[colIndex];
-                celdaAbajo.innerHTML = ""; 
-                celdaAbajo.style.backgroundColor = color !== "#ffffff" ? color : "";
+            let filaAdicional = tbody.children[rowIndex + i];
+            if (filaAdicional) {
+                let celdaAbajo = filaAdicional.cells[colIndex];
+                if (celdaAbajo) {
+                    celdaAbajo.innerHTML = ""; 
+                    celdaAbajo.style.backgroundColor = color !== "#ffffff" ? color : "";
+                    celdaAbajo.style.borderTop = "none";
+                    if (i < bloquesOcupados - 1) {
+                        celdaAbajo.style.borderBottom = "none";
+                    } else {
+                        celdaAbajo.style.borderBottom = "1px solid #000";
+                    }
+                }
             }
         }
         
@@ -324,6 +354,7 @@
         if (!celdaActiva) return;
         celdaActiva.innerHTML = "";
         celdaActiva.style.backgroundColor = "";
+        celdaActiva.style.borderBottom = "1px solid #000";
         cerrarModal();
     }
 
@@ -339,18 +370,6 @@
             enlace.href = canvas.toDataURL('image/png');
             enlace.click();
         });
-    }
-
-    function rgbToHex(rgb) {
-        if (rgb === 'rgba(0, 0, 0, 0)' || rgb === 'transparent') return "#f6e05e";
-        let rgbValues = rgb.match(/\d+/g);
-        if (!rgbValues || rgbValues.length < 3) return "#f6e05e";
-        
-        // ACÁ EL OTRO ERROR: Faltaban los índices, y
-        let r = parseInt(rgbValues).toString(16).padStart(2, '0');
-        let g = parseInt(rgbValues).toString(16).padStart(2, '0');
-        let b = parseInt(rgbValues).toString(16).padStart(2, '0');
-        return `#${r}${g}${b}`;
     }
 </script>
 
