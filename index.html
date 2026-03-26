@@ -32,19 +32,17 @@
         .btn-remove-row { background: #e53e3e; }
         .btn-remove-row:hover { background: #c53030; }
 
-        /* Estilos de la Tabla (Formato Planilla) */
+        /* Estilos de la Tabla */
         .table-wrapper { background: white; padding: 10px; border-radius: 8px; border: 2px dashed #cbd5e0; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; background: #fff; min-width: 800px; }
         th, td { border: 1px solid #000; padding: 8px; text-align: center; vertical-align: middle; height: 50px; }
         
         th { background-color: #f8fafc; font-size: 14px; color: #1a202c; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        /* Celdas de las horas (Izquierda) */
         .time-cell { font-weight: bold; background-color: #f8fafc; cursor: text; white-space: nowrap; width: 130px; font-size: 13px; outline: none; }
         .time-cell:focus { background-color: #ebf8ff; }
         .top-left-cell { background-color: #f8fafc; color: #1a202c; font-weight: bold; cursor: text; outline: none; } 
 
-        /* Celdas de los días (Donde va la materia) */
         .day-cell { cursor: pointer; font-size: 13px; font-weight: 600; color: #000; transition: 0.1s; word-wrap: break-word; max-width: 140px; }
         .day-cell:hover { outline: 2px solid var(--primary); outline-offset: -2px; background-color: #f7fafc; }
 
@@ -264,7 +262,7 @@
         // Cargar nombre
         document.getElementById('ev-nombre').value = celda.innerText;
         
-        // Cargar color de forma 100% segura
+        // Cargar color 
         let bgColor = window.getComputedStyle(celda).backgroundColor;
         document.getElementById('ev-color').value = rgbToHex(bgColor);
 
@@ -277,6 +275,7 @@
         selectFin.innerHTML = ''; 
 
         for (let i = rowIndex; i < tbody.children.length; i++) {
+            // ACÁ ESTABA EL ERROR: Agregué el para que lea la primera columna (las horas)
             let timeText = tbody.children[i].cells.innerText.trim();
             let option = document.createElement('option');
             option.value = (i - rowIndex + 1);
@@ -309,7 +308,7 @@
         celdaActiva.innerHTML = texto.replace(/\n/g, '<br>');
         celdaActiva.style.backgroundColor = color !== "#ffffff" ? color : "";
 
-        // Pintamos el resto de las celdas hacia abajo del mismo color (pero las dejamos vacías de texto)
+        // Pintamos el resto de las celdas hacia abajo del mismo color 
         for (let i = 1; i < bloquesOcupados; i++) {
             if (tbody.children[rowIndex + i]) {
                 let celdaAbajo = tbody.children[rowIndex + i].cells[colIndex];
@@ -346,6 +345,8 @@
         if (rgb === 'rgba(0, 0, 0, 0)' || rgb === 'transparent') return "#f6e05e";
         let rgbValues = rgb.match(/\d+/g);
         if (!rgbValues || rgbValues.length < 3) return "#f6e05e";
+        
+        // ACÁ EL OTRO ERROR: Faltaban los índices, y
         let r = parseInt(rgbValues).toString(16).padStart(2, '0');
         let g = parseInt(rgbValues).toString(16).padStart(2, '0');
         let b = parseInt(rgbValues).toString(16).padStart(2, '0');
