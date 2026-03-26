@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-     <link rel="icon" type="image/png" href="calendario.png">
-
-    
     <link rel="icon" type="image/png" href="calendario.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,10 +10,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
-        :root { --primary: #3182ce; --dark: #1a365d; --bg: #f0f4f8; --border: #e2e8f0; }
+        :root { --primary: #3182ce; --dark: #1a365d; --bg: #f0f4f8; --border: #cbd5e0; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         
-        .app-container { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 1000px; width: 100%; margin-top: 10px; }
+        .app-container { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 1050px; width: 100%; margin-top: 10px; overflow-x: auto; }
         
         .header-text { text-align: center; margin-bottom: 20px; }
         h2 { color: var(--dark); margin: 0 0 5px 0; font-weight: 800; font-size: 26px; }
@@ -24,52 +21,47 @@
         
         /* Controles Superiores */
         .top-controls { display: flex; flex-wrap: wrap; gap: 15px; background: #edf2f7; padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; align-items: center; justify-content: space-between; border: 1px solid var(--border); }
-        .time-config { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
-        .time-config label { font-weight: bold; color: #4a5568; font-size: 14px; }
-        .time-config select { padding: 8px; border-radius: 6px; border: 1px solid #cbd5e0; outline: none; }
         
         button { padding: 10px 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         button:hover { background: #2b6cb0; }
         .btn-download { background: #38a169; }
         .btn-download:hover { background: #2f855a; }
+        .btn-add-row { background: #4a5568; }
+        .btn-add-row:hover { background: #2d3748; }
 
-        /* Contenedor del Horario */
-        .schedule-wrapper { overflow-x: auto; background: white; padding: 10px; border-radius: 12px; border: 2px dashed #cbd5e0; }
-        .schedule { display: flex; position: relative; width: 800px; background: #fff; border-radius: 8px; border: 1px solid var(--border); }
+        /* Estilos de la Tabla (Formato Planilla) */
+        .table-wrapper { background: white; padding: 10px; border-radius: 8px; border: 2px dashed #cbd5e0; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; background: #fff; min-width: 800px; }
+        th, td { border: 1px solid #000; padding: 8px; text-align: center; vertical-align: middle; height: 50px; }
         
-        /* Columnas */
-        .time-col { width: 60px; flex-shrink: 0; border-right: 1px solid var(--border); background: #f8fafc; display: flex; flex-direction: column; }
-        .day-col { flex: 1; border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-        .day-col:last-child { border-right: none; }
+        th { background-color: #f8fafc; font-size: 14px; color: #1a202c; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        .header-cell { height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold; background: var(--dark); color: white; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
-        .time-col .header-cell { background: #2d3748; }
-        
-        /* Grilla Interna */
-        .grid-body { position: relative; flex: 1; background-image: linear-gradient(#edf2f7 1px, transparent 1px); background-size: 100% 60px; cursor: crosshair; }
-        .time-labels { flex: 1; display: flex; flex-direction: column; }
-        .time-slot { height: 60px; text-align: center; font-size: 12px; font-weight: bold; color: #a0aec0; box-sizing: border-box; transform: translateY(-8px); } /* Desplazado para alinear con la línea */
+        /* Celdas de las horas (Izquierda) */
+        .time-cell { font-weight: bold; background-color: #f8fafc; cursor: text; white-space: nowrap; width: 130px; font-size: 13px; outline: none; }
+        .time-cell:focus { background-color: #ebf8ff; }
+        .top-left-cell { background-color: #f687b3; color: black; font-weight: bold; cursor: text; outline: none; } /* Color rosa como tu foto */
 
-        /* Bloques de Eventos */
-        .materia-block { position: absolute; left: 2%; width: 96%; border-radius: 6px; padding: 6px; box-sizing: border-box; font-size: 12px; color: white; box-shadow: 0 3px 6px rgba(0,0,0,0.15); overflow: hidden; display: flex; flex-direction: column; justify-content: flex-start; line-height: 1.3; transition: transform 0.1s; cursor: default; }
-        .materia-block:hover { transform: scale(1.02); z-index: 10; }
-        .materia-title { font-weight: bold; font-size: 13px; margin-bottom: 2px; }
-        .delete-btn { position: absolute; top: 2px; right: 5px; font-weight: bold; font-size: 14px; cursor: pointer; color: rgba(255,255,255,0.7); }
-        .delete-btn:hover { color: white; }
-        .hide-for-capture .delete-btn { display: none; }
+        /* Celdas de los días (Donde va la materia) */
+        .day-cell { cursor: pointer; font-size: 13px; font-weight: 600; color: #000; transition: 0.1s; word-wrap: break-word; max-width: 140px; }
+        .day-cell:hover { outline: 2px solid var(--primary); outline-offset: -2px; background-color: #f7fafc; }
 
         /* Modal (Popup) */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
         .modal { background: white; padding: 25px; border-radius: 12px; width: 300px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .modal h3 { margin-top: 0; color: var(--dark); font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px;}
         .modal label { display: block; margin-top: 10px; font-weight: bold; color: #4a5568; font-size: 13px; }
-        .modal input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; outline: none; }
-        .modal input[type="color"] { height: 40px; padding: 2px; cursor: pointer; }
-        .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
-        .modal-actions button { flex: 1; padding: 12px; }
+        .modal textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; outline: none; resize: vertical; min-height: 60px; font-family: inherit; }
+        .modal input[type="color"] { height: 40px; width: 100%; padding: 2px; cursor: pointer; border: 1px solid #cbd5e0; border-radius: 6px; margin-top: 5px; }
+        
+        .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .row-actions { display: flex; gap: 10px; }
+        .row-actions button { flex: 1; padding: 12px; }
         .btn-cancel { background: #e2e8f0; color: #4a5568; }
         .btn-cancel:hover { background: #cbd5e0; }
+        .btn-clear { background: #e53e3e; }
+        .btn-clear:hover { background: #c53030; }
 
+        /* Footer unificado */
         footer { margin-top: 40px; text-align: center; font-size: 14px; color: #718096; width: 100%; max-width: 850px; border-top: 1px solid var(--border); padding-top: 20px; padding-bottom: 40px; }
         footer a { color: var(--primary); text-decoration: none; font-weight: bold; }
         footer a:hover { text-decoration: underline; }
@@ -80,61 +72,138 @@
 <div class="app-container">
     <div class="header-text">
         <h2>Organizador Semanal 📅</h2>
-        <p class="subtitle">Hacé clic en cualquier lugar de la grilla para agregar una actividad.</p>
+        <p class="subtitle">Hacé clic en cualquier celda para agregar una materia. Podés editar las horas haciendo clic sobre ellas.</p>
     </div>
     
     <div class="top-controls">
-        <div class="time-config">
-            <label>Mostrar desde:</label>
-            <select id="start-hour" onchange="renderizarGrilla()">
-                <option value="6">06:00</option>
-                <option value="7">07:00</option>
-                <option value="8" selected>08:00</option>
-                <option value="9">09:00</option>
-            </select>
-            <label>hasta:</label>
-            <select id="end-hour" onchange="renderizarGrilla()">
-                <option value="18">18:00</option>
-                <option value="20">20:00</option>
-                <option value="22">22:00</option>
-                <option value="23" selected>23:00</option>
-            </select>
-        </div>
+        <button class="btn-add-row" onclick="agregarFila()">+ Agregar Fila (Horario)</button>
         <button class="btn-download" onclick="descargarImagen()">📸 Descargar Imagen</button>
     </div>
 
-    <div class="schedule-wrapper">
-        <div class="schedule" id="capture-area">
-            </div>
+    <div class="table-wrapper">
+        <div id="capture-area">
+            <table id="horario-table">
+                <thead>
+                    <tr>
+                        <th class="top-left-cell" contenteditable="true">2K1(MAÑANA)</th>
+                        <th>LUNES</th>
+                        <th>MARTES</th>
+                        <th>MIERCOLES</th>
+                        <th>JUEVES</th>
+                        <th>VIERNES</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <tr>
+                        <td class="time-cell" contenteditable="true">08:00 a 08:45</td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell" contenteditable="true">08:45 a 09:30</td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell" contenteditable="true">9:30 a 10:15</td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell" contenteditable="true">10:15 a 11:00</td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell" contenteditable="true">11:00 a 11:45</td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell" contenteditable="true">11:45 a 12:30</td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell" contenteditable="true">12:30 a 13:15</td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell" contenteditable="true">13:15 a 14:00</td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell" contenteditable="true">14:00 a 14:45</td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell" contenteditable="true">14:45 a 15:30</td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                    </tr>
+                    <tr>
+                        <td class="time-cell" contenteditable="true">15:30 a 16:15</td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <div class="modal-overlay" id="modal">
     <div class="modal">
-        <h3>Agregar Actividad</h3>
+        <h3>Editar Celda</h3>
         
-        <label>Nombre:</label>
-        <input type="text" id="ev-nombre" placeholder="Ej: Gimnasio, Clases...">
+        <label>Actividad / Materia:</label>
+        <textarea id="ev-nombre" placeholder="Ej: A.M II (Aux. Marcos Paz)"></textarea>
         
-        <div style="display: flex; gap: 10px;">
-            <div style="flex: 1;">
-                <label>Inicio:</label>
-                <input type="time" id="ev-inicio">
-            </div>
-            <div style="flex: 1;">
-                <label>Fin:</label>
-                <input type="time" id="ev-fin">
-            </div>
-        </div>
-        
-        <label>Color:</label>
-        <input type="color" id="ev-color" value="#3182ce">
-        
-        <input type="hidden" id="ev-dia">
+        <label>Color de fondo:</label>
+        <input type="color" id="ev-color" value="#f6e05e">
 
         <div class="modal-actions">
-            <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
-            <button onclick="guardarEvento()">Guardar</button>
+            <button onclick="guardarCelda()">Guardar Celda</button>
+            <div class="row-actions">
+                <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn-clear" onclick="limpiarCelda()">Borrar Texto</button>
+            </div>
         </div>
     </div>
 </div>
@@ -152,127 +221,76 @@
 </footer>
 
 <script>
-    let currentStart = 8;
-    let currentEnd = 23;
-    const PIXELS_PER_HOUR = 60; // 1 pixel = 1 minuto
+    let celdaActiva = null; // Guardamos en memoria qué celda clickeó el usuario
 
-    const dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
-
-    // 1. Dibuja la estructura base de la grilla
-    function renderizarGrilla() {
-        currentStart = parseInt(document.getElementById('start-hour').value);
-        currentEnd = parseInt(document.getElementById('end-hour').value);
+    // Agrega una nueva fila al final de la tabla
+    function agregarFila() {
+        let tbody = document.getElementById('table-body');
+        let nuevaFila = document.createElement('tr');
         
-        if(currentStart >= currentEnd) {
-            alert("La hora de inicio debe ser menor a la hora de fin.");
-            document.getElementById('start-hour').value = 8;
-            document.getElementById('end-hour').value = 23;
-            renderizarGrilla();
-            return;
-        }
-
-        const container = document.getElementById('capture-area');
-        container.innerHTML = ""; // Limpiar grilla anterior
-
-        let totalHours = currentEnd - currentStart + 1;
-        let gridHeight = totalHours * PIXELS_PER_HOUR;
-
-        // Columna de Horas
-        let timeCol = `<div class="time-col"><div class="header-cell">Hora</div><div class="time-labels" style="height: ${gridHeight}px;">`;
-        for(let i = currentStart; i <= currentEnd; i++) {
-            timeCol += `<div class="time-slot">${i}:00</div>`;
-        }
-        timeCol += `</div></div>`;
-        container.innerHTML += timeCol;
-
-        // Columnas de los Días
-        dias.forEach((dia, index) => {
-            container.innerHTML += `
-                <div class="day-col">
-                    <div class="header-cell">${dia}</div>
-                    <div class="grid-body" id="col-${index}" style="height: ${gridHeight}px;" onclick="abrirModal(event, ${index})"></div>
-                </div>
-            `;
-        });
+        nuevaFila.innerHTML = `
+            <td class="time-cell" contenteditable="true">16:15 a 17:00</td>
+            <td class="day-cell" onclick="abrirModal(this)"></td>
+            <td class="day-cell" onclick="abrirModal(this)"></td>
+            <td class="day-cell" onclick="abrirModal(this)"></td>
+            <td class="day-cell" onclick="abrirModal(this)"></td>
+            <td class="day-cell" onclick="abrirModal(this)"></td>
+        `;
+        
+        tbody.appendChild(nuevaFila);
     }
 
-    // 2. Abre el Popup cuando el usuario hace clic en la grilla
-    function abrirModal(e, indexDia) {
-        // Evitar que el clic en un evento ya creado dispare el modal de fondo
-        if(e.target.classList.contains('materia-block') || e.target.classList.contains('delete-btn')) return;
+    // Abre el modal al hacer clic en una celda
+    function abrirModal(celda) {
+        celdaActiva = celda;
+        
+        // Si la celda ya tenía texto o color, lo cargamos en el modal
+        document.getElementById('ev-nombre').value = celda.innerText;
+        
+        // Convertimos el color RGB (que usa el navegador) a HEX para el input
+        let bgColor = window.getComputedStyle(celda).backgroundColor;
+        if(bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+            document.getElementById('ev-color').value = rgbToHex(bgColor);
+        } else {
+            document.getElementById('ev-color').value = "#f6e05e"; // Amarillo por defecto
+        }
 
-        // Calcular la hora clickeada (cada 60px es 1 hora)
-        let offsetY = e.offsetY;
-        let clickedHourDecimal = (offsetY / PIXELS_PER_HOUR) + currentStart;
-        
-        let hora = Math.floor(clickedHourDecimal);
-        let minutos = Math.floor((clickedHourDecimal - hora) * 60);
-        
-        // Redondear a intervalos de 15 min para mejor experiencia
-        minutos = Math.floor(minutos / 15) * 15; 
-        
-        let inicioStr = `${hora.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}`;
-        
-        // Sugerir 2 horas de duración por defecto
-        let finHora = hora + 2;
-        if(finHora > currentEnd) finHora = currentEnd;
-        let finStr = `${finHora.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}`;
-
-        document.getElementById('ev-inicio').value = inicioStr;
-        document.getElementById('ev-fin').value = finStr;
-        document.getElementById('ev-dia').value = indexDia;
-        document.getElementById('ev-nombre').value = ""; // Limpiar input
-        
         document.getElementById('modal').style.display = "flex";
         document.getElementById('ev-nombre').focus();
     }
 
     function cerrarModal() {
         document.getElementById('modal').style.display = "none";
+        celdaActiva = null;
     }
 
-    // 3. Guarda el evento y lo dibuja
-    function guardarEvento() {
-        let nombre = document.getElementById('ev-nombre').value;
-        let inicio = document.getElementById('ev-inicio').value;
-        let fin = document.getElementById('ev-fin').value;
-        let color = document.getElementById('ev-color').value;
-        let indexDia = document.getElementById('ev-dia').value;
-
-        if (!nombre) { alert("Ingresá un nombre para la actividad."); return; }
-
-        let [hIni, mIni] = inicio.split(':').map(Number);
-        let [hFin, mFin] = fin.split(':').map(Number);
-
-        if (hIni < currentStart || hFin > currentEnd || (hIni > hFin) || (hIni === hFin && mIni >= mFin)) {
-            alert(`Verificá las horas. Deben estar entre las ${currentStart}:00 y las ${currentEnd}:00`);
-            return;
-        }
-
-        // Calcular posición en píxeles (1 min = 1 px)
-        let minutosDesdeInicio = (hIni * 60 + mIni) - (currentStart * 60);
-        let duracion = (hFin * 60 + mFin) - (hIni * 60 + mIni);
-
-        let bloque = document.createElement('div');
-        bloque.className = 'materia-block';
-        bloque.style.top = minutosDesdeInicio + 'px';
-        bloque.style.height = duracion + 'px';
-        bloque.style.backgroundColor = color;
+    function guardarCelda() {
+        if (!celdaActiva) return;
         
-        bloque.innerHTML = `
-            <span class="delete-btn" onclick="this.parentElement.remove()" title="Eliminar">×</span>
-            <div class="materia-title">${nombre}</div>
-            <div style="font-size: 11px; opacity: 0.9;">${inicio} - ${fin}</div>
-        `;
+        let texto = document.getElementById('ev-nombre').value;
+        let color = document.getElementById('ev-color').value;
 
-        document.getElementById(`col-${indexDia}`).appendChild(bloque);
+        // Reemplazamos los saltos de línea por etiquetas <br> para que se vea bien en la tabla
+        celdaActiva.innerHTML = texto.replace(/\n/g, '<br>');
+        
+        if (texto.trim() !== "") {
+            celdaActiva.style.backgroundColor = color;
+        } else {
+            celdaActiva.style.backgroundColor = ""; // Si lo deja vacío, le sacamos el color
+        }
+        
         cerrarModal();
     }
 
-    // 4. Descarga la imagen
+    function limpiarCelda() {
+        if (!celdaActiva) return;
+        celdaActiva.innerHTML = "";
+        celdaActiva.style.backgroundColor = "";
+        cerrarModal();
+    }
+
     function descargarImagen() {
         const area = document.getElementById('capture-area');
-        area.classList.add('hide-for-capture');
 
         html2canvas(area, {
             scale: 2, 
@@ -280,15 +298,19 @@
             logging: false
         }).then(canvas => {
             let enlace = document.createElement('a');
-            enlace.download = 'Mi_Horario_Semanal.png';
+            enlace.download = 'Mi_Planilla_Horarios.png';
             enlace.href = canvas.toDataURL('image/png');
             enlace.click();
-            area.classList.remove('hide-for-capture');
         });
     }
 
-    // Inicializar grilla al cargar la página
-    window.onload = renderizarGrilla;
+    // Función auxiliar para convertir colores RGB a Hexadecimal (necesario para el input color)
+    function rgbToHex(rgb) {
+        let match = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+        if (!match) return "#ffffff";
+        function hex(x) { return ("0" + parseInt(x).toString(16)).slice(-2); }
+        return "#" + hex(match) + hex(match) + hex(match);
+    }
 </script>
 
 </body>
