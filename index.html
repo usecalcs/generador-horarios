@@ -264,7 +264,7 @@
         // 1. Cargar el texto actual
         document.getElementById('ev-nombre').value = celda.innerText;
         
-        // 2. Cargar el color actual y arreglar el bug rgbToHex
+        // 2. Cargar el color actual
         let bgColor = window.getComputedStyle(celda).backgroundColor;
         if(bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
             document.getElementById('ev-color').value = rgbToHex(bgColor);
@@ -282,7 +282,7 @@
 
         // Leer los horarios de las filas que están por debajo para dar la opción de extender la clase
         for (let i = rowIndex; i < tbody.children.length; i++) {
-            // Corrección: Leer la celda 0 (donde está el horario)
+            // CORRECCIÓN CLAVE ACÁ: Faltaba el para apuntar a la celda de la hora
             let timeText = tbody.children[i].cells.innerText.trim();
             let option = document.createElement('option');
             option.value = (i - rowIndex + 1); // Este valor indicará cuántos bloques ocupa (rowspan)
@@ -397,11 +397,11 @@
         });
     }
 
+    // CORRECCIÓN CLAVE ACÁ: Faltaban los corchetes en el match para leer bien el color
     function rgbToHex(rgb) {
         let match = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
         if (!match) return "#ffffff";
         function hex(x) { return ("0" + parseInt(x).toString(16)).slice(-2); }
-        // Se corrigió el error de pasar parámetros inválidos
         return "#" + hex(match) + hex(match) + hex(match);
     }
 </script>
