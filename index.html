@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="icon" type="image/png" href="calendario.png">
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Crea, organiza y descarga tu horario semanal en formato imagen gratis. Ideal para estudios, trabajo, gimnasio o rutinas.">
+    <title>Generador de Horarios Semanales | UseCalcs</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        :root { --primary: #3182ce; --dark: #1a365d; --bg: #f0f4f8; --accent: #f6e05e; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        
+        .app-container { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 1050px; width: 100%; display: flex; flex-wrap: wrap; gap: 25px; margin-top: 20px; }
+        
+        .header-text { width: 100%; text-align: center; }
+        h2 { color: var(--dark); margin: 0 0 5px 0; font-weight: 800; letter-spacing: -0.5px; font-size: 28px; }
+        p.subtitle { color: #718096; margin: 0 0 15px 0; font-size: 15px; }
+        
+        /* Panel de Controles */
+        .controls { flex: 1; min-width: 280px; background: #edf2f7; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; height: fit-content; }
+        .controls label { display: block; margin-top: 15px; font-weight: bold; color: #4a5568; font-size: 14px; }
+        .controls input, .controls select { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #cbd5e0; border-radius: 8px; box-sizing: border-box; font-size: 14px; outline: none; transition: 0.2s; }
+        .controls input:focus, .controls select:focus { border-color: var(--primary); }
+        
+        .color-picker-wrapper { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+        .controls input[type="color"] { width: 50px; height: 40px; padding: 0; cursor: pointer; border: none; border-radius: 8px; }
+        
+        button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; margin-top: 25px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(49,130,206,0.2); }
+        button:hover { background: #2b6cb0; transform: translateY(-1px); }
+        .btn-download { background: #38a169; box-shadow: 0 4px 6px rgba(56,161,105,0.2); margin-top: 15px; }
+        .btn-download:hover { background: #2f855a; }
+
+        /* Contenedor del Horario (Scrollable en móviles) */
+        .schedule-wrapper { flex: 2; min-width: 320px; overflow-x: auto; background: white; padding: 15px; border-radius: 12px; border: 2px dashed #cbd5e0; }
+        
+        /* Grilla del Horario */
+        .schedule { display: flex; position: relative; width: 700px; background: #fff; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; }
+        
+        /* Columna de Horas */
+        .time-col { width: 55px; flex-shrink: 0; border-right: 1px solid #e2e8f0; background: #f8fafc; }
+        .time-slot { height: 60px; text-align: center; padding-top: 5px; font-size: 12px; font-weight: bold; color: #a0aec0; border-bottom: 1px solid #edf2f7; box-sizing: border-box; }
+        
+        /* Columnas de Días */
+        .day-col { flex: 1; border-right: 1px solid #e2e8f0; position: relative; }
+        .day-col:last-child { border-right: none; }
+        .day-header { text-align: center; font-weight: bold; background: var(--dark); color: white; padding: 12px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+        .day-grid { position: relative; height: 900px; background-image: linear-gradient(#edf2f7 1px, transparent 1px); background-size: 100% 60px; }
+        
+        /* Bloque de Actividad */
+        .materia-block { position: absolute; left: 4%; width: 92%; border-radius: 6px; padding: 6px; box-sizing: border-box; font-size: 12px; color: white; box-shadow: 0 3px 6px rgba(0,0,0,0.15); overflow: hidden; display: flex; flex-direction: column; justify-content: center; text-align: center; line-height: 1.3; transition: transform 0.2s; }
+        .materia-block:hover { transform: scale(1.02); z-index: 10; }
+        .materia-title { font-weight: bold; font-size: 13px; margin-bottom: 4px; }
+        
+        /* Botón de borrar */
+        .delete-btn { position: absolute; top: 2px; right: 5px; font-weight: bold; font-size: 14px; cursor: pointer; color: rgba(255,255,255,0.7); }
+        .delete-btn:hover { color: white; }
+        .hide-for-capture .delete-btn { display: none; }
+
+        /* Footer unificado */
+        footer { margin-top: 40px; text-align: center; font-size: 14px; color: #718096; width: 100%; max-width: 850px; border-top: 1px solid #e2e8f0; padding-top: 20px; padding-bottom: 40px; }
+        footer a { color: var(--primary); text-decoration: none; font-weight: bold; }
+        footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header-text">
+        <h2>Organizador Semanal 📅</h2>
+        <p class="subtitle">Organizá tus actividades y descargá la grilla en formato imagen.</p>
+    </div>
+    
+    <div class="controls">
+        <label for="nombre">Actividad / Materia:</label>
+        <input type="text" id="nombre" placeholder="Ej: Sistemas Operativos, Gimnasio...">
+
+        <label for="dia">Día de la semana:</label>
+        <select id="dia">
+            <option value="1">Lunes</option>
+            <option value="2">Martes</option>
+            <option value="3">Miércoles</option>
+            <option value="4">Jueves</option>
+            <option value="5">Viernes</option>
+        </select>
+
+        <div style="display: flex; gap: 15px;">
+            <div style="flex: 1;">
+                <label for="inicio">Hora Inicio:</label>
+                <input type="time" id="inicio" value="08:00">
+            </div>
+            <div style="flex: 1;">
+                <label for="fin">Hora Fin:</label>
+                <input type="time" id="fin" value="10:00">
+            </div>
+        </div>
+
+        <label for="color">Color de Etiqueta:</label>
+        <div class="color-picker-wrapper">
+            <input type="color" id="color" value="#3182ce">
+            <span style="font-size: 13px; color: #718096;">Elegí un color para diferenciarla</span>
+        </div>
+
+        <button onclick="agregarMateria()">+ Añadir a la Grilla</button>
+        <button class="btn-download" onclick="descargarImagen()">📸 Descargar como Imagen</button>
+    </div>
+
+    <div class="schedule-wrapper">
+        <div class="schedule" id="capture-area">
+            <div class="time-col">
+                <div class="day-header" style="background: #2d3748;">Hora</div>
+                <script>
+                    for(let i=8; i<=22; i++) {
+                        document.write(`<div class="time-slot">${i}:00</div>`);
+                    }
+                </script>
+            </div>
+
+            <div class="day-col">
+                <div class="day-header">Lunes</div>
+                <div class="day-grid" id="day-1"></div>
+            </div>
+            <div class="day-col">
+                <div class="day-header">Martes</div>
+                <div class="day-grid" id="day-2"></div>
+            </div>
+            <div class="day-col">
+                <div class="day-header">Miércoles</div>
+                <div class="day-grid" id="day-3"></div>
+            </div>
+            <div class="day-col">
+                <div class="day-header">Jueves</div>
+                <div class="day-grid" id="day-4"></div>
+            </div>
+            <div class="day-col">
+                <div class="day-header">Viernes</div>
+                <div class="day-grid" id="day-5"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p style="margin-bottom: 10px;"><b>UseCalcs</b> - Herramientas para Estudiantes y Freelancers</p>
+    <div style="display: flex; justify-content: center; align-items: center; gap: 15px; flex-wrap: wrap;">
+        <a href="https://usecalcs.github.io/calculadora-matrices/">Calculadora de Álgebra</a>
+        <span style="color: #cbd5e0;">|</span>
+        <a href="https://usecalcs.github.io/percentage-calculator/">Calculadoras de Porcentajes</a>
+        <span style="color: #cbd5e0;">|</span>
+        <a href="https://getchatlink.github.io/">GetChatLink</a>
+    </div>
+    <p style="font-size: 11px; margin-top: 15px; opacity: 0.6;">Desarrollado por Dante</p>
+</footer>
+
+<script>
+    const HORA_INICIO_BASE = 8; 
+
+    function agregarMateria() {
+        let nombre = document.getElementById('nombre').value;
+        let dia = document.getElementById('dia').value;
+        let inicio = document.getElementById('inicio').value;
+        let fin = document.getElementById('fin').value;
+        let color = document.getElementById('color').value;
+
+        if (!nombre || !inicio || !fin) {
+            alert("Por favor completá el nombre y las horas de la actividad.");
+            return;
+        }
+
+        let [hIni, mIni] = inicio.split(':').map(Number);
+        let [hFin, mFin] = fin.split(':').map(Number);
+
+        if (hIni < HORA_INICIO_BASE || hFin > 23 || (hIni > hFin) || (hIni === hFin && mIni >= mFin)) {
+            alert("El horario es inválido. Asegurate de que esté entre las 08:00 y las 23:00, y que la hora de fin sea posterior a la de inicio.");
+            return;
+        }
+
+        let minutosInicio = (hIni * 60) + mIni - (HORA_INICIO_BASE * 60);
+        let duracion = ((hFin * 60) + mFin) - ((hIni * 60) + mIni);
+
+        let bloque = document.createElement('div');
+        bloque.className = 'materia-block';
+        bloque.style.top = minutosInicio + 'px';
+        bloque.style.height = duracion + 'px';
+        bloque.style.backgroundColor = color;
+        
+        bloque.innerHTML = `
+            <span class="delete-btn" onclick="this.parentElement.remove()" title="Eliminar actividad">×</span>
+            <div class="materia-title">${nombre}</div>
+            <div>${inicio} - ${fin}</div>
+        `;
+
+        document.getElementById('day-' + dia).appendChild(bloque);
+        document.getElementById('nombre').value = '';
+    }
+
+    function descargarImagen() {
+        const area = document.getElementById('capture-area');
+        area.classList.add('hide-for-capture');
+
+        html2canvas(area, {
+            scale: 2, 
+            backgroundColor: "#ffffff",
+            logging: false
+        }).then(canvas => {
+            let enlace = document.createElement('a');
+            enlace.download = 'Mi_Horario_Semanal.png';
+            enlace.href = canvas.toDataURL('image/png');
+            enlace.click();
+            area.classList.remove('hide-for-capture');
+        }).catch(err => {
+            console.error("Error al generar la imagen: ", err);
+            area.classList.remove('hide-for-capture');
+            alert("Hubo un problema al generar la imagen. Intentá nuevamente.");
+        });
+    }
+</script>
+
+</body>
+</html>
