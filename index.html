@@ -204,7 +204,7 @@
 </footer>
 
 <script>
-    // 🚨 EL DETECTOR DE ERRORES: Si algo falla, va a saltar esta alerta
+    // Detector de errores
     window.onerror = function(msg, url, line) {
         alert("⚠️ ERROR TÉCNICO DETECTADO ⚠️\n\nMensaje: " + msg + "\nLínea: " + line + "\n\nPasale captura de este mensaje a tu asistente.");
         return false;
@@ -212,13 +212,10 @@
 
     let celdaActiva = null; 
 
-    // Lógica maestra de clics a prueba de fallos
     document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('table-body').addEventListener('click', function(e) {
             let celda = e.target.closest('.day-cell');
-            if (celda) {
-                abrirModal(celda);
-            }
+            if (celda) abrirModal(celda);
         });
     });
 
@@ -234,11 +231,8 @@
 
     function borrarUltimaFila() {
         let tbody = document.getElementById('table-body');
-        if (tbody.children.length > 1) {
-            tbody.removeChild(tbody.lastElementChild);
-        } else {
-            alert("No podés borrar la última fila que queda.");
-        }
+        if (tbody.children.length > 1) tbody.removeChild(tbody.lastElementChild);
+        else alert("No podés borrar la última fila que queda.");
     }
 
     function seleccionarColor(hex, elemento) {
@@ -252,12 +246,32 @@
         document.querySelectorAll('.color-swatch').forEach(sw => sw.classList.remove('active'));
     }
 
+    // ALGORITMO INTELIGENTE PARA LEER HORAS
+    function extraerHorasRegex(textoFila) {
+        let texto = textoFila || "";
+        // Busca si hay patrones de reloj (ej: 08:00, 8:45)
+        let relojes = texto.match(/\d{1,2}:\d{2}/g);
+        
+        if (relojes && relojes.length >= 2) {
+            return { inicio: relojes, fin: relojes[relojes.length - 1] };
+        } else if (relojes && relojes.length === 1) {
+            return { inicio: relojes, fin: relojes };
+        }
+        
+        // Si no hay reloj, corta por la letra "a", "A", o un guión de forma segura
+        let partes = texto.split(/\s+[aA]\s+|\s*-\s*|hasta/);
+        let inicio = partes.trim();
+        let fin = partes.length > 1 ? partes[partes.length - 1].trim() : inicio;
+        
+        return { inicio: inicio || "--:--", fin: fin || "--:--" };
+    }
+
     function abrirModal(celda) {
         try {
             celdaActiva = celda;
             document.getElementById('ev-nombre').value = celda.innerText || celda.textContent || "";
             
-            // Carga de color a prueba de fallos
+            // Determinar color
             let colorHex = "#fef08a"; 
             try {
                 let bgColor = window.getComputedStyle(celda).backgroundColor;
@@ -272,6 +286,7 @@
                 }
             } catch(e) {}
             
+            // Marcar el circulito de color
             let swatches = document.querySelectorAll('.color-swatch');
             let encontrado = false;
             swatches.forEach(sw => {
@@ -282,42 +297,50 @@
                 }
             });
             
-            if (!encontrado && colorHex !== "#ffffff") {
-                document.getElementById('ev-color-custom').value = colorHex;
-            }
+            if (!encontrado && colorHex !== "#ffffff") document.getElementById('ev-color-custom').value = colorHex;
             document.getElementById('ev-color').value = colorHex;
 
+            // Extraer horas para el menú
             let tbody = document.getElementById('table-body');
-            let tr = celda.parentElement;
+            let tr = celda.closest('tr');
+            let rowIndex = Array.from(tbody.children).indexOf(tr);
+            let colIndex = celda.cellIndex;
             
-            let rowIndex = -1;
-            for(let i = 0; i < tbody.children.length; i++) {
-                if(tbody.children[i] === tr) { rowIndex = i; break; }
-            }
+            let celdaHoraInicial = tr.querySelector('.time-cell');
+            let textoHoraInicial = celdaHoraInicial ? (celdaHoraInicial.innerText || celdaHoraInicial.textContent) : "";
+            let horasInicial = extraerHorasRegex(textoHoraInicial);
             
+            document.getElementById('ev-inicio-text').innerText = horasInicial.inicio;
+
             let selectFin = document.getElementById('ev-fin');
             selectFin.innerHTML = ''; 
-
-            // Algoritmo robusto para separar las horas usando expresiones regulares
-            let textoHoraInicial = tbody.children[rowIndex].cells.innerText.trim();
-            let partesInicio = textoHoraInicial.split(/\s+a\s+|\s+A\s+|\s*-\s*/);
-            document.getElementById('ev-inicio-text').innerText = partesInicio || textoHoraInicial;
 
             for (let i = rowIndex; i < tbody.children.length; i++) {
                 let fila = tbody.children[i];
                 let celdaHora = fila.querySelector('.time-cell');
-                let textoFila = celdaHora ? celdaHora.innerText.trim() : "";
-                
-                let partesFila = textoFila.split(/\s+a\s+|\s+A\s+|\s*-\s*/);
-                let parteFin = partesFila.length > 1 ? partesFila : textoFila;
+                let textoFila = celdaHora ? (celdaHora.innerText || celdaHora.textContent) : "";
+                let horasFila = extraerHorasRegex(textoFila);
                 
                 let option = document.createElement('option');
                 option.value = (i - rowIndex + 1);
-                option.innerText = parteFin.trim();
+                option.innerText = horasFila.fin;
                 selectFin.appendChild(option);
             }
             
-            selectFin.value = celda.rowSpan || 1;
+            // Calcular inteligentemente hasta dónde estaba estirada la materia
+            let bloquesActuales = 1;
+            if (celda.style.borderBottom === "none") {
+                for (let i = 1; i < tbody.children.length - rowIndex; i++) {
+                    let celdaAbajo = tbody.children[rowIndex + i]?.cells[colIndex];
+                    if (celdaAbajo && celdaAbajo.innerHTML === "" && celdaAbajo.style.backgroundColor === celda.style.backgroundColor) {
+                        bloquesActuales++;
+                        if (celdaAbajo.style.borderBottom !== "none") break; 
+                    } else {
+                        break;
+                    }
+                }
+            }
+            selectFin.value = bloquesActuales;
 
             document.getElementById('modal').style.display = "flex";
             document.getElementById('ev-nombre').focus();
@@ -340,25 +363,21 @@
             let bloquesOcupados = parseInt(document.getElementById('ev-fin').value) || 1;
 
             let tbody = document.getElementById('table-body');
-            let tr = celdaActiva.parentElement;
-            
-            let rowIndex = -1;
-            for(let i = 0; i < tbody.children.length; i++) {
-                if(tbody.children[i] === tr) { rowIndex = i; break; }
-            }
+            let tr = celdaActiva.closest('tr');
+            let rowIndex = Array.from(tbody.children).indexOf(tr);
             let colIndex = celdaActiva.cellIndex;
 
-            // Restaurar celdas previas
-            let oldSpan = celdaActiva.rowSpan;
-            if (oldSpan > 1) {
-                for (let i = 1; i < oldSpan; i++) {
-                    if (tbody.children[rowIndex + i]) {
-                        let celdaOculta = tbody.children[rowIndex + i].cells[colIndex];
-                        if(celdaOculta) {
-                            celdaOculta.style.display = "";
-                            celdaOculta.style.borderTop = "1px solid #000";
-                            celdaOculta.style.borderBottom = "1px solid #000";
-                        }
+            // Limpiar estiramientos viejos
+            if (celdaActiva.style.borderBottom === "none") {
+                let colorFondo = celdaActiva.style.backgroundColor;
+                for (let i = 1; i < tbody.children.length - rowIndex; i++) {
+                    let celdaAbajo = tbody.children[rowIndex + i]?.cells[colIndex];
+                    if (celdaAbajo && celdaAbajo.innerHTML === "" && celdaAbajo.style.backgroundColor === colorFondo) {
+                        celdaAbajo.style.backgroundColor = "";
+                        celdaAbajo.style.borderTop = "1px solid #000";
+                        celdaAbajo.style.borderBottom = "1px solid #000";
+                    } else {
+                        break; 
                     }
                 }
             }
@@ -371,26 +390,11 @@
                 celdaActiva.style.borderBottom = "none";
             }
 
-            celdaActiva.rowSpan = 1;
-
             for (let i = 1; i < bloquesOcupados; i++) {
                 let filaAdicional = tbody.children[rowIndex + i];
                 if (filaAdicional) {
                     let celdaAbajo = filaAdicional.cells[colIndex];
                     if (celdaAbajo) {
-                        let childSpan = celdaAbajo.rowSpan;
-                        if (childSpan > 1) {
-                            for(let j = 1; j < childSpan; j++) {
-                                let hiddenChild = tbody.children[rowIndex + i + j]?.cells[colIndex];
-                                if(hiddenChild) {
-                                    hiddenChild.style.display = "";
-                                    hiddenChild.style.borderTop = "1px solid #000";
-                                    hiddenChild.style.borderBottom = "1px solid #000";
-                                }
-                            }
-                        }
-
-                        celdaAbajo.rowSpan = 1;
                         celdaAbajo.innerHTML = ""; 
                         celdaAbajo.style.backgroundColor = color !== "#ffffff" ? color : "";
                         celdaAbajo.style.borderTop = "none";
@@ -413,7 +417,7 @@
             if (!celdaActiva) return;
             
             let tbody = document.getElementById('table-body');
-            let tr = celdaActiva.parentElement;
+            let tr = celdaActiva.closest('tr');
             let rowIndex = Array.from(tbody.children).indexOf(tr);
             let colIndex = celdaActiva.cellIndex;
 
