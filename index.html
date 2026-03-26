@@ -47,7 +47,7 @@
         .day-cell:hover { outline: 2px solid var(--primary); outline-offset: -2px; background-color: #f7fafc; }
 
         /* Modal (Popup) */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
         .modal { background: white; padding: 25px; border-radius: 12px; width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .modal h3 { margin-top: 0; color: var(--dark); font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px;}
         .modal label { display: block; margin-top: 10px; font-weight: bold; color: #4a5568; font-size: 13px; }
@@ -84,8 +84,8 @@
     
     <div class="top-controls">
         <div class="row-buttons">
-            <button class="btn-add-row" onclick="agregarFila()">+ Agregar Fila (Horario)</button>
-            <button class="btn-remove-row" onclick="borrarUltimaFila()">- Borrar Última Fila</button>
+            <button class="btn-add-row" onclick="agregarFila()">+ Agregar Fila</button>
+            <button class="btn-remove-row" onclick="borrarUltimaFila()">- Borrar Fila</button>
         </div>
         <button class="btn-download" onclick="descargarImagen()">📸 Descargar Imagen</button>
     </div>
@@ -106,91 +106,47 @@
                 <tbody id="table-body">
                     <tr>
                         <td class="time-cell" contenteditable="true">08:00 a 08:45</td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td>
                     </tr>
                     <tr>
                         <td class="time-cell" contenteditable="true">08:45 a 09:30</td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td>
                     </tr>
                     <tr>
                         <td class="time-cell" contenteditable="true">09:30 a 10:15</td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td>
                     </tr>
                     <tr>
                         <td class="time-cell" contenteditable="true">10:15 a 11:00</td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td>
                     </tr>
                     <tr>
                         <td class="time-cell" contenteditable="true">11:00 a 11:45</td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td>
                     </tr>
                     <tr>
                         <td class="time-cell" contenteditable="true">11:45 a 12:30</td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td>
                     </tr>
                     <tr>
                         <td class="time-cell" contenteditable="true">12:30 a 13:15</td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td>
                     </tr>
                     <tr>
                         <td class="time-cell" contenteditable="true">13:15 a 14:00</td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td>
                     </tr>
                     <tr>
                         <td class="time-cell" contenteditable="true">14:00 a 14:45</td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td>
                     </tr>
                     <tr>
                         <td class="time-cell" contenteditable="true">14:45 a 15:30</td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td>
                     </tr>
                     <tr>
                         <td class="time-cell" contenteditable="true">15:30 a 16:15</td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
-                        <td class="day-cell" onclick="abrirModal(this)"></td>
+                        <td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td>
                     </tr>
                 </tbody>
             </table>
@@ -203,7 +159,7 @@
         <h3>Editar Actividad</h3>
         
         <label>Materia / Tarea:</label>
-        <textarea id="ev-nombre" placeholder="Ej: Álgebra, Trabajo..."></textarea>
+        <textarea id="ev-nombre" placeholder="Ej: Programación, Gimnasio, Trabajo..."></textarea>
         
         <div style="margin-top: 15px; font-size: 13px; color: #4a5568;">
             <b>Desde:</b> <span id="ev-inicio-text" style="color: var(--primary); font-weight: bold;">--:--</span>
@@ -248,21 +204,31 @@
 </footer>
 
 <script>
+    // 🚨 EL DETECTOR DE ERRORES: Si algo falla, va a saltar esta alerta
+    window.onerror = function(msg, url, line) {
+        alert("⚠️ ERROR TÉCNICO DETECTADO ⚠️\n\nMensaje: " + msg + "\nLínea: " + line + "\n\nPasale captura de este mensaje a tu asistente.");
+        return false;
+    };
+
     let celdaActiva = null; 
+
+    // Lógica maestra de clics a prueba de fallos
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('table-body').addEventListener('click', function(e) {
+            let celda = e.target.closest('.day-cell');
+            if (celda) {
+                abrirModal(celda);
+            }
+        });
+    });
 
     function agregarFila() {
         let tbody = document.getElementById('table-body');
         let nuevaFila = document.createElement('tr');
-        
         nuevaFila.innerHTML = `
             <td class="time-cell" contenteditable="true">16:15 a 17:00</td>
-            <td class="day-cell" onclick="abrirModal(this)"></td>
-            <td class="day-cell" onclick="abrirModal(this)"></td>
-            <td class="day-cell" onclick="abrirModal(this)"></td>
-            <td class="day-cell" onclick="abrirModal(this)"></td>
-            <td class="day-cell" onclick="abrirModal(this)"></td>
+            <td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td><td class="day-cell"></td>
         `;
-        
         tbody.appendChild(nuevaFila);
     }
 
@@ -275,10 +241,8 @@
         }
     }
 
-    // Funciones para la paleta de colores
     function seleccionarColor(hex, elemento) {
         document.getElementById('ev-color').value = hex;
-        // Sacar la clase active de todos los circulitos
         document.querySelectorAll('.color-swatch').forEach(sw => sw.classList.remove('active'));
         if (elemento) elemento.classList.add('active');
     }
@@ -289,80 +253,77 @@
     }
 
     function abrirModal(celda) {
-        celdaActiva = celda;
-        
-        // 1. Cargar nombre
-        document.getElementById('ev-nombre').value = celda.innerText || "";
-        
-        // 2. Cargar color
-        let colorHex = "#fef08a"; // Amarillo pastel por defecto
         try {
-            let bgColor = window.getComputedStyle(celda).backgroundColor;
-            if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
-                let rgb = bgColor.match(/\d+/g);
-                if (rgb && rgb.length >= 3) {
-                    let r = parseInt(rgb).toString(16).padStart(2, '0');
-                    let g = parseInt(rgb).toString(16).padStart(2, '0');
-                    let b = parseInt(rgb).toString(16).padStart(2, '0');
-                    colorHex = "#" + r + g + b;
+            celdaActiva = celda;
+            document.getElementById('ev-nombre').value = celda.innerText || celda.textContent || "";
+            
+            // Carga de color a prueba de fallos
+            let colorHex = "#fef08a"; 
+            try {
+                let bgColor = window.getComputedStyle(celda).backgroundColor;
+                if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+                    let rgb = bgColor.match(/\d+/g);
+                    if (rgb && rgb.length >= 3) {
+                        let r = parseInt(rgb).toString(16).padStart(2, '0');
+                        let g = parseInt(rgb).toString(16).padStart(2, '0');
+                        let b = parseInt(rgb).toString(16).padStart(2, '0');
+                        colorHex = "#" + r + g + b;
+                    }
                 }
-            }
-        } catch(e) {}
-        
-        // Buscar si el color existe en la paleta y marcarlo
-        let swatches = document.querySelectorAll('.color-swatch');
-        let encontrado = false;
-        swatches.forEach(sw => {
-            sw.classList.remove('active');
-            if (sw.getAttribute('data-color') === colorHex) {
-                sw.classList.add('active');
-                encontrado = true;
-            }
-        });
-        
-        if (!encontrado && colorHex !== "#ffffff") {
-            document.getElementById('ev-color-custom').value = colorHex;
-        }
-        document.getElementById('ev-color').value = colorHex;
-
-        // 3. Extraer el "Desde" y las opciones "Hasta"
-        let tbody = document.getElementById('table-body');
-        let tr = celda.parentElement;
-        
-        let rowIndex = -1;
-        for(let i = 0; i < tbody.children.length; i++) {
-            if(tbody.children[i] === tr) { rowIndex = i; break; }
-        }
-        
-        let selectFin = document.getElementById('ev-fin');
-        selectFin.innerHTML = ''; 
-
-        // Conseguir la hora de inicio de la celda clickeada
-        let textoHoraInicial = tbody.children[rowIndex].cells.innerText.trim();
-        let parteInicio = textoHoraInicial.split(" a "); // Recorta lo de antes de la "a"
-        document.getElementById('ev-inicio-text').innerText = parteInicio || textoHoraInicial;
-
-        // Armar el desplegable con las horas de fin
-        for (let i = rowIndex; i < tbody.children.length; i++) {
-            let fila = tbody.children[i];
-            let celdaHora = fila.querySelector('.time-cell');
-            let textoFila = celdaHora ? celdaHora.innerText.trim() : "";
+            } catch(e) {}
             
-            // Recorta lo de después de la "a" (ej: de "08:45 a 09:30" saca "09:30")
-            let partesFila = textoFila.split(" a ");
-            let parteFin = partesFila.length > 1 ? partesFila : textoFila;
+            let swatches = document.querySelectorAll('.color-swatch');
+            let encontrado = false;
+            swatches.forEach(sw => {
+                sw.classList.remove('active');
+                if (sw.getAttribute('data-color') === colorHex) {
+                    sw.classList.add('active');
+                    encontrado = true;
+                }
+            });
             
-            let option = document.createElement('option');
-            option.value = (i - rowIndex + 1);
-            option.innerText = parteFin.trim();
-            selectFin.appendChild(option);
-        }
-        
-        // Mantener la selección anterior si la celda ya ocupaba varios bloques
-        selectFin.value = celda.rowSpan || 1;
+            if (!encontrado && colorHex !== "#ffffff") {
+                document.getElementById('ev-color-custom').value = colorHex;
+            }
+            document.getElementById('ev-color').value = colorHex;
 
-        document.getElementById('modal').style.display = "flex";
-        document.getElementById('ev-nombre').focus();
+            let tbody = document.getElementById('table-body');
+            let tr = celda.parentElement;
+            
+            let rowIndex = -1;
+            for(let i = 0; i < tbody.children.length; i++) {
+                if(tbody.children[i] === tr) { rowIndex = i; break; }
+            }
+            
+            let selectFin = document.getElementById('ev-fin');
+            selectFin.innerHTML = ''; 
+
+            // Algoritmo robusto para separar las horas usando expresiones regulares
+            let textoHoraInicial = tbody.children[rowIndex].cells.innerText.trim();
+            let partesInicio = textoHoraInicial.split(/\s+a\s+|\s+A\s+|\s*-\s*/);
+            document.getElementById('ev-inicio-text').innerText = partesInicio || textoHoraInicial;
+
+            for (let i = rowIndex; i < tbody.children.length; i++) {
+                let fila = tbody.children[i];
+                let celdaHora = fila.querySelector('.time-cell');
+                let textoFila = celdaHora ? celdaHora.innerText.trim() : "";
+                
+                let partesFila = textoFila.split(/\s+a\s+|\s+A\s+|\s*-\s*/);
+                let parteFin = partesFila.length > 1 ? partesFila : textoFila;
+                
+                let option = document.createElement('option');
+                option.value = (i - rowIndex + 1);
+                option.innerText = parteFin.trim();
+                selectFin.appendChild(option);
+            }
+            
+            selectFin.value = celda.rowSpan || 1;
+
+            document.getElementById('modal').style.display = "flex";
+            document.getElementById('ev-nombre').focus();
+        } catch (error) {
+            alert("Error crítico abriendo la ventana: " + error.message);
+        }
     }
 
     function cerrarModal() {
@@ -371,110 +332,113 @@
     }
 
     function guardarCelda() {
-        if (!celdaActiva) return;
-        
-        let texto = document.getElementById('ev-nombre').value;
-        let color = document.getElementById('ev-color').value;
-        let bloquesOcupados = parseInt(document.getElementById('ev-fin').value);
+        try {
+            if (!celdaActiva) return;
+            
+            let texto = document.getElementById('ev-nombre').value;
+            let color = document.getElementById('ev-color').value;
+            let bloquesOcupados = parseInt(document.getElementById('ev-fin').value) || 1;
 
-        let tbody = document.getElementById('table-body');
-        let tr = celdaActiva.parentElement;
-        
-        let rowIndex = -1;
-        for(let i = 0; i < tbody.children.length; i++) {
-            if(tbody.children[i] === tr) { rowIndex = i; break; }
-        }
-        
-        let colIndex = celdaActiva.cellIndex;
-
-        // Restaurar celdas ocultas debajo (por si achicamos la materia)
-        let oldSpan = celdaActiva.rowSpan;
-        if (oldSpan > 1) {
-            for (let i = 1; i < oldSpan; i++) {
-                if (tbody.children[rowIndex + i]) {
-                    let celdaOculta = tbody.children[rowIndex + i].cells[colIndex];
-                    celdaOculta.style.display = "";
-                    celdaOculta.style.borderTop = "1px solid #000";
-                    celdaOculta.style.borderBottom = "1px solid #000";
-                }
+            let tbody = document.getElementById('table-body');
+            let tr = celdaActiva.parentElement;
+            
+            let rowIndex = -1;
+            for(let i = 0; i < tbody.children.length; i++) {
+                if(tbody.children[i] === tr) { rowIndex = i; break; }
             }
-        }
+            let colIndex = celdaActiva.cellIndex;
 
-        // Limpiar bordes antes de aplicar nuevos
-        celdaActiva.style.borderBottom = "1px solid #000";
-        celdaActiva.innerHTML = texto.replace(/\n/g, '<br>');
-        celdaActiva.style.backgroundColor = color !== "#ffffff" ? color : "";
-
-        if (bloquesOcupados > 1) {
-            celdaActiva.style.borderBottom = "none";
-        }
-
-        celdaActiva.rowSpan = 1;
-
-        for (let i = 1; i < bloquesOcupados; i++) {
-            let filaAdicional = tbody.children[rowIndex + i];
-            if (filaAdicional) {
-                let celdaAbajo = filaAdicional.cells[colIndex];
-                if (celdaAbajo) {
-                    // Borramos el rowspan si es que tenía uno
-                    let childSpan = celdaAbajo.rowSpan;
-                    if (childSpan > 1) {
-                        for(let j = 1; j < childSpan; j++) {
-                            let hiddenChild = tbody.children[rowIndex + i + j]?.cells[colIndex];
-                            if(hiddenChild) {
-                                hiddenChild.style.display = "";
-                                hiddenChild.style.borderTop = "1px solid #000";
-                                hiddenChild.style.borderBottom = "1px solid #000";
-                            }
+            // Restaurar celdas previas
+            let oldSpan = celdaActiva.rowSpan;
+            if (oldSpan > 1) {
+                for (let i = 1; i < oldSpan; i++) {
+                    if (tbody.children[rowIndex + i]) {
+                        let celdaOculta = tbody.children[rowIndex + i].cells[colIndex];
+                        if(celdaOculta) {
+                            celdaOculta.style.display = "";
+                            celdaOculta.style.borderTop = "1px solid #000";
+                            celdaOculta.style.borderBottom = "1px solid #000";
                         }
                     }
+                }
+            }
 
-                    celdaAbajo.rowSpan = 1;
-                    celdaAbajo.innerHTML = ""; 
-                    celdaAbajo.style.backgroundColor = color !== "#ffffff" ? color : "";
-                    celdaAbajo.style.borderTop = "none";
-                    if (i < bloquesOcupados - 1) {
-                        celdaAbajo.style.borderBottom = "none";
-                    } else {
-                        celdaAbajo.style.borderBottom = "1px solid #000";
+            celdaActiva.style.borderBottom = "1px solid #000";
+            celdaActiva.innerHTML = texto.replace(/\n/g, '<br>');
+            celdaActiva.style.backgroundColor = color !== "#ffffff" ? color : "";
+
+            if (bloquesOcupados > 1) {
+                celdaActiva.style.borderBottom = "none";
+            }
+
+            celdaActiva.rowSpan = 1;
+
+            for (let i = 1; i < bloquesOcupados; i++) {
+                let filaAdicional = tbody.children[rowIndex + i];
+                if (filaAdicional) {
+                    let celdaAbajo = filaAdicional.cells[colIndex];
+                    if (celdaAbajo) {
+                        let childSpan = celdaAbajo.rowSpan;
+                        if (childSpan > 1) {
+                            for(let j = 1; j < childSpan; j++) {
+                                let hiddenChild = tbody.children[rowIndex + i + j]?.cells[colIndex];
+                                if(hiddenChild) {
+                                    hiddenChild.style.display = "";
+                                    hiddenChild.style.borderTop = "1px solid #000";
+                                    hiddenChild.style.borderBottom = "1px solid #000";
+                                }
+                            }
+                        }
+
+                        celdaAbajo.rowSpan = 1;
+                        celdaAbajo.innerHTML = ""; 
+                        celdaAbajo.style.backgroundColor = color !== "#ffffff" ? color : "";
+                        celdaAbajo.style.borderTop = "none";
+                        if (i < bloquesOcupados - 1) {
+                            celdaAbajo.style.borderBottom = "none";
+                        } else {
+                            celdaAbajo.style.borderBottom = "1px solid #000";
+                        }
                     }
                 }
             }
+            cerrarModal();
+        } catch (error) {
+            alert("Error al guardar: " + error.message);
         }
-        
-        cerrarModal();
     }
 
     function limpiarCelda() {
-        if (!celdaActiva) return;
-        
-        let tbody = document.getElementById('table-body');
-        let tr = celdaActiva.parentElement;
-        let rowIndex = Array.from(tbody.children).indexOf(tr);
-        let colIndex = celdaActiva.cellIndex;
+        try {
+            if (!celdaActiva) return;
+            
+            let tbody = document.getElementById('table-body');
+            let tr = celdaActiva.parentElement;
+            let rowIndex = Array.from(tbody.children).indexOf(tr);
+            let colIndex = celdaActiva.cellIndex;
 
-        // Calculamos cuántos bloques hacia abajo tiene pintados (sin texto)
-        let colorFondo = celdaActiva.style.backgroundColor;
-        
-        celdaActiva.innerHTML = "";
-        celdaActiva.style.backgroundColor = "";
-        celdaActiva.style.borderBottom = "1px solid #000"; 
-        
-        // Recorrer hacia abajo y limpiar las celdas que formaban parte del bloque
-        if (colorFondo) {
-            for (let i = 1; i < tbody.children.length - rowIndex; i++) {
-                let celdaAbajo = tbody.children[rowIndex + i]?.cells[colIndex];
-                if (celdaAbajo && celdaAbajo.innerHTML === "" && celdaAbajo.style.backgroundColor === colorFondo) {
-                    celdaAbajo.style.backgroundColor = "";
-                    celdaAbajo.style.borderTop = "1px solid #000";
-                    celdaAbajo.style.borderBottom = "1px solid #000";
-                } else {
-                    break; // Si encontramos una con texto u otro color, paramos
+            let colorFondo = celdaActiva.style.backgroundColor;
+            
+            celdaActiva.innerHTML = "";
+            celdaActiva.style.backgroundColor = "";
+            celdaActiva.style.borderBottom = "1px solid #000"; 
+            
+            if (colorFondo) {
+                for (let i = 1; i < tbody.children.length - rowIndex; i++) {
+                    let celdaAbajo = tbody.children[rowIndex + i]?.cells[colIndex];
+                    if (celdaAbajo && celdaAbajo.innerHTML === "" && celdaAbajo.style.backgroundColor === colorFondo) {
+                        celdaAbajo.style.backgroundColor = "";
+                        celdaAbajo.style.borderTop = "1px solid #000";
+                        celdaAbajo.style.borderBottom = "1px solid #000";
+                    } else {
+                        break; 
+                    }
                 }
             }
+            cerrarModal();
+        } catch(error) {
+            alert("Error limpiando: " + error.message);
         }
-
-        cerrarModal();
     }
 
     function descargarImagen() {
